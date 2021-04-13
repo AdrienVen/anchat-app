@@ -2,7 +2,7 @@
 
 ## AnChat is a secure, web based messaging app currently being designed by [Alex Gonsalves](mailto:ag6191@nyu.edu) and [Adrien Ventugol](mailto:agv261@nyu.edu).
 
-### Implemented mostly in Python, it relies on python-socketio for its [backend](ag6191/anchat/src/main/server.py), as well as HTML/CSS, JavaScript and socketIO for its [frontend](ag6191/anchat/src/main/client.py).
+### Implemented mostly in Python, it relies on python-socketio for its [backend](/main/server.py), as well as HTML/CSS, JavaScript and socketIO for its [frontend](/main/client.py).
 
 # How to run:
 

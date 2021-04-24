@@ -6,7 +6,7 @@ import socketio
 import socket as sck
 import group_manager as gm
 
-sio = socketio.Server()
+sio = socketio.Server(async_mode="eventlet")
 manager = gm.GroupManager()
 app = socketio.WSGIApp(sio, static_files={
     '/': {'content_type': 'text/html', 'filename': 'client.html'}

@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Mar 20 17:59:00 2021
+# server.py - made by Adrien Ventugol and Alex Gonsalves
 
-@author: adven
-"""
 import eventlet
 import socketio
 import socket as sck
@@ -14,8 +11,8 @@ manager = gm.GroupManager()
 app = socketio.WSGIApp(sio, static_files={
     '/': {'content_type': 'text/html', 'filename': 'client.html'}
 })
-
 ip2ID = {}
+
 #
 # connect - Registers when a client has connected
 #
@@ -78,26 +75,36 @@ def disconnectUser(sid, data):
             sio.emit("removeUser", data, to=socket)
             sio.emit("updateUsers", {"users": manager.get_group_names(data["group"])})
 
+
+#
+# exchange_addresses - Send addresses to two clients that are attemting to join a game together
+#
 @sio.event
 def exchange_addresses(sid, data):
+    # get client A information
     print(data["name"],"has submitted a game request with",data["to"])
     ip_A = ip2ID[sid]
     sendPort_A = data["sendPort"]
     listenPort_A = data["listenPort"]
+
+    # get client B information
     other_sid = manager.get_group_socket_from_name(data["group"], data["to"])
     print(other_sid)
     ip_B = ip2ID[other_sid]
     sendPort_B = data["listenPort"]
     listenPort_B = data["sendPort"]
     
+    # send client B information to client A
     socket_a = sck.socket(sck.AF_INET, sck.SOCK_DGRAM)
     print("sending "+ip_B+','+sendPort_A+','+listenPort_A,"to A")
     socket_a.sendto((ip_B+','+sendPort_A+','+listenPort_A+','+"GAME").encode(), (ip_A, 12005))
     
+    # send client A information to client B
     socket_b = sck.socket(sck.AF_INET, sck.SOCK_DGRAM)
     print("sending "+ip_A+','+sendPort_B+','+listenPort_B,"to B")
     socket_b.sendto((ip_A+','+sendPort_B+','+listenPort_B+','+"ENEMY_TURN").encode(), (ip_B, 12005))
-    
+
+
 #     
 # send - Sends a message to all connected clients
 #

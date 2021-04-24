@@ -1,3 +1,5 @@
+<!-- client.html - made by Adrien Ventugol and Alex Gonsalves -->
+
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -12,12 +14,10 @@
 		
 		h1 {
 			font-size: 3rem;
-		
 		}
 		
 		h2 {
 			font-size: 2rem;
-		
 		}
 		
 		.login_input {
@@ -32,8 +32,6 @@
 			margin-bottom: 3rem;
 			text-align: center;
 			color: aliceblue;
-			
-		
 		}
 		
 		.login_input:focus {
@@ -67,7 +65,6 @@
 		}
 		
 		#join_button{
-		
 			width: 50%;
 			border-radius: 35px;
 			background-color: darkblue;
@@ -116,7 +113,6 @@
 			border-radius: 20px;
 			width: 10%;
 			padding-top: 5px;
-			/* height: 45%; */
 			padding-bottom: 5px;
 			margin-right: 20px;
 		}
@@ -159,20 +155,13 @@
 		document.getElementById("message_input").placeholder = "Send to " + variables["group"];
 		document.getElementById("message_input").value = "";
 
+		// clear old messages
+		document.getElementById("messages").innerHTML = "";
 		// reset user list
 		updateUserList([]);
 
 		// reset recipient list
 		updateRecipientList();
-		
-		//create Gaming button
-		let x = document.createElement("BUTTON");
-		var t = document.createTextNode("Send IP");
-		x.appendChild(t)
-		x.id = "game_button"
-		document.getElementById("input_box").appendChild(x)
-		document.getElementById("game_button").onclick = send_addy;
-		
 	}
 
 	
@@ -276,6 +265,9 @@
 		
 		// add message to message box
 		document.getElementById("messages").appendChild(node);
+
+		// set scroll position to bottom
+		document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
 	}
 
 
@@ -288,6 +280,9 @@
 		disconnect_message.innerHTML = "[SERVER]: User " + name + " has left the chat...";
 		disconnect_message.style.color = "black";
 		document.getElementById("messages").appendChild(disconnect_message);
+
+		// set scroll position to bottom
+		document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
 	}
 
 
@@ -382,6 +377,38 @@
 	}
 
 
+	/*
+	 * selectPorts - Randomly selects listening and sending ports for the client
+	 */
+	function selectPorts(){
+		variables["listenPort"] = (Math.floor(Math.random() * 100) + 12000).toString;
+		variables["sendPort"]  = (Math.floor(Math.random() * 100) + 12000).toString;
+	}
+	
+
+	/*
+	 * sendAddress - Sends the user's remote address to the group-chat member specified in the second input
+	 */
+	function sendAddress(){
+		updateRecipient();
+		if (variables["target"] != "all"){
+			selectPorts();
+			socket.emit("exchange_addresses",{
+				"name":		variables["name"],
+				"to":		variables["target"],
+				"ip": 		variables["ip"],
+				"group":	variables["group"],
+				"sendPort" : variables["sendPort"],
+				"listenPort": 	variables["listenPort"]});
+
+			let node = document.createElement("P");
+			node.innerHTML = variables["ip"] + ',' + variables["listenPort"] + ' -> ' + variables["target"];
+			node.style.color = "blue";
+			document.getElementById("messages").appendChild(node);
+		}
+	}
+
+
 	// *********  SOCKET API  *********
 
 	/*
@@ -419,9 +446,13 @@
 		}
 	});
 	
+
+	/*
+	 * addr - Sets the local ip variable to what the server gave
+	 */
 	socket.on("addr", function(data) {
-		variables["ip"] = data["ip"]
-	})
+		variables["ip"] = data["ip"];
+	});
 
 
 	/*
@@ -448,36 +479,6 @@
 		updateRecipientList();
 		updateRecipient();
 	});
-	
-	function selectPorts(){
-	let ptNumber1 = Math.floor(Math.random() * 100) + 12000;
-	let ptNumber2 = Math.floor(Math.random() * 100) + 12000;
-	let port1 = ptNumber1.toString()
-	let port2 = ptNumber2.toString()
-	variables["listenPort"] = port1
-	variables["sendPort"]  = port2
-	}
-	
-	
-	//send_addy - sends the user's remote address to the groupchat member specified in input2
-	function send_addy(){
-		updateRecipient();
-		if (variables["target"] != "all"){
-			selectPorts()
-			socket.emit("exchange_addresses",{
-								"name":		variables["name"],
-								"to":		variables["target"],
-								"ip": 		variables["ip"],
-								"group":	variables["group"],
-								"sendPort" : variables["sendPort"],
-								"listenPort": 	variables["listenPort"]
-								})
-			let node = document.createElement("P");
-			node.innerHTML = variables["ip"] + ',' + variables["listenPort"] + ' -> ' + variables["target"];
-			node.style.color = "blue";
-			document.getElementById("messages").appendChild(node);
-		}
-	}
 	</script>
 
 	<body>
@@ -509,6 +510,7 @@
 					<input id="message_input" placeholder="group name"></input>
 					<input id="send_button" type="submit" value="Send" onclick="sendMsg()"></input>
 					<input id="exit_button" type="submit" value="Exit" onclick="disconnectSelf()"></input>
+					<input id="game_button" type="submit" value="Send IP" onclick="sendAddress()"></input>
 				</div>
 			</div>
 		</div>

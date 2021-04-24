@@ -84,8 +84,8 @@
 		let x = document.createElement("BUTTON");
 		var t = document.createTextNode("Send IP");
 		x.appendChild(t)
-		x.id = "button2"
-		document.body.appendChild(x)
+		x.id = "game_button"
+		document.getElementById("input_box").appendChild(x)
 		document.getElementById("button2").onclick = send_addy;
 	}
 
@@ -332,6 +332,10 @@
 			document.getElementById("username_input").value = "";
 		}
 	});
+	
+	socket.on("addr", function(data) {
+		variables["ip"] = data["ip"]
+	})
 
 
 	/*
@@ -375,9 +379,10 @@
 		if (variables["target"] != "all"){
 			selectPorts()
 			socket.emit("exchange_addresses",{
-								"user":		variables["username"],
+								"name":		variables["name"],
 								"to":		variables["target"],
 								"ip": 		variables["ip"],
+								"group":	variables["group"],
 								"sendPort" : variables["sendPort"],
 								"listenPort": 	variables["listenPort"]
 								})
@@ -385,7 +390,6 @@
 			node.innerHTML = variables["ip"] + ',' + variables["listenPort"] + ' -> ' + variables["target"];
 			node.style.color = "blue";
 			document.getElementById("messages").appendChild(node);
-			document.getElementById("input2").value = "";
 		}
 	}
 	</script>

@@ -80,13 +80,13 @@ def disconnectUser(sid, data):
 
 @sio.event
 def exchange_addresses(sid, data):
-    print(data["user"],"has submitted a game request with",data["to"])
+    print(data["name"],"has submitted a game request with",data["to"])
     ip_A = ip2ID[sid]
     sendPort_A = data["sendPort"]
     listenPort_A = data["listenPort"]
-    
-    
-    ip_B = ip2ID[manager.user_name_to_socket[data["to"]]]
+    other_sid = manager.get_group_socket_from_name(data["group"], data["to"])
+    print(other_sid)
+    ip_B = ip2ID[other_sid]
     sendPort_B = data["listenPort"]
     listenPort_B = data["sendPort"]
     

@@ -3,13 +3,61 @@
 	<head>
 		<title>AnChat - Login</title>
 	</head>
+
+	<style>
+		body {
+			background-color: #303030;
+			color: #F0F0F0;
+		}
+
+		#chat_div {
+			width: 80%;
+			margin: 0 auto;
+		}
+
+		#login_div {
+			width: 80%;
+			margin: 0 auto;
+		}
+
+		#messaging_box {
+			display: flex;
+			width: 90%;
+			height: 300px;
+			background-color: #C0C0C0;
+			margin-bottom: 30px;
+		}
+
+		#messages {
+			word-wrap: break-word;
+			border: 3px solid #DCDCDC;
+			width: 80%;
+			height: 100%;
+			overflow: scroll;
+		}
+
+		#users {
+			word-wrap: break-word;
+			border: 3px solid #DCDCDC;
+			width: 20%;
+			height: 100%;
+			overflow: scroll;
+		}
+	</style>
+
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
+	
 	<script type="text/javascript">
 
 	// Socket variables
 	url = ('http://' + document.domain + ':' + location.port);
 	socket = io.connect(url);
-	variables = {};
+	variables = {
+		"group": "",
+		"name": "",
+		"target": "all",
+		"users": [] 
+	};
 
 
 	/*
@@ -25,6 +73,12 @@
 		document.getElementById("chat_subtitle").innerHTML = "You may start chatting with the members of the group.";
 		document.getElementById("message_input").placeholder = "Send to " + variables["group"];
 		document.getElementById("message_input").value = "";
+
+		// reset user list
+		updateUserList([]);
+
+		// reset recipient list
+		updateRecipientList();
 	}
 
 	
@@ -74,17 +128,26 @@
 		let payload = {
 			"group":	variables["group"],
 			"name":		variables["name"],
+			"target": 	variables["target"],
 			"message": 	document.getElementById("message_input").value};
 		socket.emit("recv", payload);
 		
-		// add message to message box
+		// add private or public message to the message box
 		let node = document.createElement("P");
-		node.innerHTML = variables["name"] + ": " + document.getElementById("message_input").value;
-		node.style.color = "blue";
+		if (variables["target"] == "all") {
+			node.innerHTML = variables["name"] + ": " + document.getElementById("message_input").value;
+			node.style.color = "blue";
+		} else {
+			node.innerHTML = "(private to " + variables["target"] + ") " + variables["name"] + ": " + document.getElementById("message_input").value;
+			node.style.color = "#795400";
+		}
 		document.getElementById("messages").appendChild(node);
 		
 		// clear message input
 		document.getElementById("message_input").value = "";
+
+		// set scroll position to bottom
+		document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
 	}
 
 
@@ -126,10 +189,102 @@
 	 * disconnectUser - removes a user from the chat and notifies the client
 	 */
 	function disconnectUser(name) {
-		let node = document.createElement("P");
-		node.innerHTML = "[SERVER]: User " + name + " has left the chat...";
-		node.style.color = "black";
-		document.getElementById("messages").appendChild(node);
+		// tell client a user has left
+		let disconnect_message = document.createElement("P");
+		disconnect_message.innerHTML = "[SERVER]: User " + name + " has left the chat...";
+		disconnect_message.style.color = "black";
+		document.getElementById("messages").appendChild(disconnect_message);
+	}
+
+
+	/*
+	 * updateUserList - Removes and updates the user list
+	 */
+	function updateUserList(users) {
+		// remove all elements from old user list
+		for( var i = 0; i < variables["users"].length; i++){ 
+			const elements = document.getElementsByClassName(variables["users"][i]);
+			while (elements.length > 0) elements[0].remove();
+		}
+
+		variables["users"] = users;
+
+		// add all elements back to the user list
+		for( var i = 0; i < variables["users"].length; i++){ 
+			let user_node = document.createElement("P");
+			user_node.className = variables["users"][i];
+			if (variables["name"] == variables["users"][i]) {
+				user_node.innerHTML = variables["users"][i] + " (me)";
+				user_node.style.color = "blue";
+			} else {
+				user_node.innerHTML = variables["users"][i];
+				user_node.style.color = "black";
+			}
+
+			//add user to user list box
+			document.getElementById("users").appendChild(user_node);
+		}
+	}
+
+
+	/*
+	 * updateRecipientList - Updates the list of selected recipients
+	 */
+	function updateRecipientList() {
+		var selector = document.getElementById("recipient_selector");
+
+		// check to see if new users should be added
+		for (var i=0; i<variables["users"].length; i++) {
+			var included = false;
+			for (var j=0; j<selector.length; j++) {
+				if (selector.options[j].value == variables["users"][i]) {
+					included = true;
+					break;
+				}
+			}
+			
+			// add the new user if it is not included and is not the client's user
+			if ((variables["users"][i] != variables["name"]) && (!included)) {
+				var opt = document.createElement('option');
+				opt.value = variables["users"][i];
+				opt.innerHTML = variables["users"][i];
+				selector.appendChild(opt);
+			}
+		}
+
+		// check to see if selector users should be removed
+		for (var i=0; i<selector.length; i++) {
+			if ((selector.options[i].value != "all") && (!variables["users"].includes(selector.options[i].value))) {
+				// check if target needs to be moved
+				if (variables["target"] == selector.options[i].value) {
+					//update target
+					document.getElementById("recipient_selector").selectedIndex = 0;
+					updateRecipient();
+				}
+
+				// remove option
+				selector.remove(i);
+			}	
+		}		
+	}
+
+
+	/*
+	 * updateRecipient - Updates the target message recipient and interface
+	 */
+	function updateRecipient() {
+		// set new target
+		var recipient = document.getElementById("recipient_selector").value;
+		variables["target"] = recipient;
+
+		if (recipient == "all") {
+			// sending a message to everyone
+			document.getElementById("message_input").placeholder = "Send to " + variables["group"];
+		} else {
+			// sending a private message
+			document.getElementById("message_input").placeholder = "Send to " + recipient;
+		}
+
 	}
 
 
@@ -140,9 +295,20 @@
 	 */
 	socket.on("recvMsg", function(data){
 		let node = document.createElement("P");
-		node.innerHTML = data["name"]+':\t'+data["message"];
-		node.style.color = "red";
+
+		// display the message as a private or public message depending on the target
+		if (data["target"] != "all") {
+			node.innerHTML = "(private to me) " + data["name"]+':\t'+data["message"];
+			node.style.color = "#9A4D00";
+		} else {
+			node.innerHTML = data["name"]+':\t'+data["message"];
+			node.style.color = "#DC143C";
+		}
+		
 		document.getElementById("messages").appendChild(node);
+
+		// set scroll position to bottom
+		document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
 	});
 
 
@@ -175,24 +341,48 @@
 		connectUser(data["name"]);
 	});
 
+
+	/*
+	 * updateUsers - gets a new connected user list and updates the interface
+	 */
+	socket.on("updateUsers", function(data) {
+		updateUserList(data["users"]);
+		updateRecipientList();
+		updateRecipient();
+	});
 	</script>
 
 	<body>
-		<div id="login_div">
-			<h1 id="login_title"></h1>
-			<p id ="login_subtitle"></p>
-			<input id="group_input" placeholder="group name"></input>
-			<input id="username_input" placeholder="username"></input>
-			<input id="join_button" type="submit" value="Join" onclick="join()"></input>
-		</div>
+		<div id="content">
 
-		<div id="chat_div">
-			<h1 id="chat_title"></h1>
-			<p id ="chat_subtitle"></p>
-			<div id="messages"></div>
-			<input id="message_input" placeholder="group name"></input>
-			<input id="send_button" type="submit" value="Send" onclick="sendMsg()"></input>
-			<input id="exit_button" type="submit" value="Exit" onclick="disconnectSelf()"></input>
+			<!-- login content -->
+			<div id="login_div">
+				<h1 id="login_title"></h1>
+				<p id ="login_subtitle"></p>
+				<input id="group_input" placeholder="group name"></input>
+				<input id="username_input" placeholder="username"></input>
+				<input id="join_button" type="submit" value="Join" onclick="join()"></input>
+			</div>
+
+			<!-- chat content -->
+			<div id="chat_div">
+				<h1 id="chat_title"></h1>
+				<p id ="chat_subtitle"></p>
+
+				<div id="messaging_box"> 
+					<div id="messages"></div>
+					<div id="users"></div>
+				</div>
+
+				<div id="input_box">
+					<select id="recipient_selector" onchange="updateRecipient()">
+						<option value="all" selected="selected">all</option>
+					</select>
+					<input id="message_input" placeholder="group name"></input>
+					<input id="send_button" type="submit" value="Send" onclick="sendMsg()"></input>
+					<input id="exit_button" type="submit" value="Exit" onclick="disconnectSelf()"></input>
+				</div>
+			</div>
 		</div>
 			
 		<script type="text/javascript"> window.onLoad = loginLayout(); </script>

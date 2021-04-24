@@ -77,3 +77,14 @@ class GroupManager:
         for client in self.groups.get(group, []):
             sockets.append(client.socket)
         return sockets
+
+
+    #
+    # get_group_socket_from_name - Returns the socket with a given name in a group
+    #
+    def get_group_socket_from_name(self, group, name):
+        for client in self.groups.get(group, []):
+            if client.name == name:
+                return client.socket
+        
+        return None

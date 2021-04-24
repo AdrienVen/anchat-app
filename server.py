@@ -36,6 +36,8 @@ def join(sid,data):
         # notify every member of a group that a client has joined (including this client)
         for socket in manager.get_group_sockets(data["group"]):
                 sio.emit("addUser", data, to=socket)
+                sio.emit("updateUsers", {"users": manager.get_group_names(data["group"])})
+
     else:
         # username in this group has been taken
         print(sid + " has FAILED to join group: " + data["group"])
@@ -43,13 +45,18 @@ def join(sid,data):
 
 
 #
-# recv - Transmits data from one client to the rest of the clients in the group
+# recv - Transmits data from one client to other client(s) depending on the target
 #
 @sio.event
 def recv(sid, data):
-    print("received '" + data["message"] + "' from " + data["name"] + " for group " + data["group"])
-    for socket in manager.get_group_sockets(data["group"]):
-        if socket != sid:
+    print("received '" + data["message"] + "' from " + data["name"] + " to " + data["target"] + " for group " + data["group"])
+    if data["target"] == "all":
+        for socket in manager.get_group_sockets(data["group"]):
+            if socket != sid:
+                sio.emit("recvMsg", data, to=socket)
+    else:
+        socket = manager.get_group_socket_from_name(data["group"], data["target"])
+        if socket != None:
             sio.emit("recvMsg", data, to=socket)
 
 
@@ -60,13 +67,15 @@ def recv(sid, data):
 def disconnectUser(sid, data):
     print("disconnecting " + data["name"] + " from group " + data["group"])
 
-    # tell all clients in this group that this client has disconnected    
-    for socket in manager.get_group_sockets(data["group"]):
-        if socket != sid:
-            sio.emit("removeUser", data, to=socket)
-
     # remove this client from the group
     manager.remove_client_from_group(data["group"], sid, data["name"])
+
+    # tell all clients in this group that this client has disconnected    
+    for socket in manager.get_group_sockets(data["group"]):
+            sio.emit("removeUser", data, to=socket)
+            sio.emit("updateUsers", {"users": manager.get_group_names(data["group"])})
+
+    
 
 
 #     

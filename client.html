@@ -79,6 +79,14 @@
 
 		// reset recipient list
 		updateRecipientList();
+		
+		//create Gaming button
+		let x = document.createElement("BUTTON");
+		var t = document.createTextNode("Send IP");
+		x.appendChild(t)
+		x.id = "button2"
+		document.body.appendChild(x)
+		document.getElementById("button2").onclick = send_addy;
 	}
 
 	
@@ -350,6 +358,36 @@
 		updateRecipientList();
 		updateRecipient();
 	});
+	
+	function selectPorts(){
+	let ptNumber1 = Math.floor(Math.random() * 100) + 12000;
+	let ptNumber2 = Math.floor(Math.random() * 100) + 12000;
+	let port1 = ptNumber1.toString()
+	let port2 = ptNumber2.toString()
+	variables["listenPort"] = port1
+	variables["sendPort"]  = port2
+	}
+	
+	
+	//send_addy - sends the user's remote address to the groupchat member specified in input2
+	function send_addy(){
+		updateRecipient();
+		if (variables["target"] != "all"){
+			selectPorts()
+			socket.emit("exchange_addresses",{
+								"user":		variables["username"],
+								"to":		variables["target"],
+								"ip": 		variables["ip"],
+								"sendPort" : variables["sendPort"],
+								"listenPort": 	variables["listenPort"]
+								})
+			let node = document.createElement("P");
+			node.innerHTML = variables["ip"] + ',' + variables["listenPort"] + ' -> ' + variables["target"];
+			node.style.color = "blue";
+			document.getElementById("messages").appendChild(node);
+			document.getElementById("input2").value = "";
+		}
+	}
 	</script>
 
 	<body>
@@ -387,4 +425,3 @@
 			
 		<script type="text/javascript"> window.onLoad = loginLayout(); </script>
 	</body>
-</html>

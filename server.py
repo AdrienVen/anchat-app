@@ -6,6 +6,7 @@ Created on Sat Mar 20 17:59:00 2021
 """
 import eventlet
 import socketio
+import socket as sck
 import group_manager as gm
 
 sio = socketio.Server()
@@ -14,13 +15,15 @@ app = socketio.WSGIApp(sio, static_files={
     '/': {'content_type': 'text/html', 'filename': 'client.html'}
 })
 
-
+ip2ID = {}
 #
 # connect - Registers when a client has connected
 #
 @sio.event
 def connect(sid, environ):
-    print('connect ', sid)
+    print('connect ',environ["REMOTE_ADDR"],"on port",environ["REMOTE_PORT"])
+    sio.emit("addr",{"ip": environ["REMOTE_ADDR"],"port":environ["REMOTE_PORT"]}, room=sid)
+    ip2ID[sid] = environ["REMOTE_ADDR"]
     
 
 #
@@ -75,9 +78,26 @@ def disconnectUser(sid, data):
             sio.emit("removeUser", data, to=socket)
             sio.emit("updateUsers", {"users": manager.get_group_names(data["group"])})
 
+@sio.event
+def exchange_addresses(sid, data):
+    print(data["user"],"has submitted a game request with",data["to"])
+    ip_A = ip2ID[sid]
+    sendPort_A = data["sendPort"]
+    listenPort_A = data["listenPort"]
     
-
-
+    
+    ip_B = ip2ID[manager.user_name_to_socket[data["to"]]]
+    sendPort_B = data["listenPort"]
+    listenPort_B = data["sendPort"]
+    
+    socket_a = sck.socket(sck.AF_INET, sck.SOCK_DGRAM)
+    print("sending "+ip_B+','+sendPort_A+','+listenPort_A,"to A")
+    socket_a.sendto((ip_B+','+sendPort_A+','+listenPort_A+','+"GAME").encode(), (ip_A, 12005))
+    
+    socket_b = sck.socket(sck.AF_INET, sck.SOCK_DGRAM)
+    print("sending "+ip_A+','+sendPort_B+','+listenPort_B,"to B")
+    socket_b.sendto((ip_A+','+sendPort_B+','+listenPort_B+','+"ENEMY_TURN").encode(), (ip_B, 12005))
+    
 #     
 # send - Sends a message to all connected clients
 #

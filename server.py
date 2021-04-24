@@ -126,7 +126,7 @@ def main(arg1, arg2):
     eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
     
 if __name__ == '__main__':
-    @sio.run_app()
+    @sio.run_app(app, "8000")
     
 #if __name__ == '__main__':
 #    port = int(os.environ.get('PORT', 8080))

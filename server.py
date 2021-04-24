@@ -13,10 +13,6 @@ app = socketio.WSGIApp(sio, static_files={
 })
 ip2ID = {}
 
-#
-# connect - Registers when a client has connected
-#
-
 @sio.event
 def connect(sid, environ):
     print('connect ',environ["REMOTE_ADDR"],"on port",environ["REMOTE_PORT"])
@@ -24,9 +20,6 @@ def connect(sid, environ):
     ip2ID[sid] = environ["REMOTE_ADDR"]
     
 
-#
-# join - Attempts to add a client into a group and sends back a join status message
-#
 @sio.event
 def join(sid,data):
     if manager.add_client(sid, data["name"], data["group"]):
@@ -45,9 +38,6 @@ def join(sid,data):
         sio.emit("joinStatus","0", room=sid)
 
 
-#
-# recv - Transmits data from one client to other client(s) depending on the target
-#
 @sio.event
 def recv(sid, data):
     print("received '" + data["message"] + "' from " + data["name"] + " to " + data["target"] + " for group " + data["group"])
@@ -61,9 +51,6 @@ def recv(sid, data):
             sio.emit("recvMsg", data, to=socket)
 
 
-#
-# disconnectUser - Disconnects a user from their group and notifies the group members of it
-#
 @sio.event
 def disconnectUser(sid, data):
     print("disconnecting " + data["name"] + " from group " + data["group"])
@@ -77,9 +64,6 @@ def disconnectUser(sid, data):
             sio.emit("updateUsers", {"users": manager.get_group_names(data["group"])})
 
 
-#
-# exchange_addresses - Send addresses to two clients that are attemting to join a game together
-#
 @sio.event
 def exchange_addresses(sid, data):
     # get client A information
@@ -106,17 +90,11 @@ def exchange_addresses(sid, data):
     socket_b.sendto((ip_A+','+sendPort_B+','+listenPort_B+','+"ENEMY_TURN").encode(), (ip_B, 12005))
 
 
-#     
-# send - Sends a message to all connected clients
-#
 @sio.event
 def send(data):
     sio.emit("recvMsg", {"server": str(data)})
 
 
-#
-# disconnect - Prints that a socket has disconnected (is this automatic? if so the sid should be removed from the manager and a message sent to everyone in that group)
-#
 @sio.event
 def disconnect(sid):
     print('disconnect ', sid)
@@ -124,10 +102,3 @@ def disconnect(sid):
 def main(arg1, arg2):
     print(arg1,arg2)
     eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
-    
-if __name__ == '__main__':
-    @sio.run_app(app, port="8000")
-    
-#if __name__ == '__main__':
-#    port = int(os.environ.get('PORT', 8080))
-#    web.run_app(app, port=port)

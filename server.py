@@ -100,5 +100,5 @@ def disconnect(sid):
     print('disconnect ', sid)
 
 def main(arg1, arg2):
-    print(arg1,arg2)
     eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
+    return app.static_files["/"]

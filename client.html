@@ -86,27 +86,39 @@
 		}
 
 		#messaging_box {
+			color: white;
 			display: flex;
 			width: 90%;
 			height: 300px;
-			background-color: #C0C0C0;
+			
+			background-color: inherit;
 			margin-bottom: 30px;
 		}
 
 		#messages {
+			border:3px solid white;
+			border-left: none;
+			border-right: none;
+			border-bottom: none;
 			word-wrap: break-word;
-			border: 3px solid #DCDCDC;
+			padding: 10px;
+			background-color: inherit;
 			width: 80%;
 			height: 100%;
-			overflow: scroll;
+			overflow: hidden;
 		}
 
 		#users {
+			color: white;
+			text-align: center;
 			word-wrap: break-word;
-			border: 3px solid #DCDCDC;
+			border:3px solid white;
+			border-left: none;
+			border-right: none;
+			border-bottom: none;
 			width: 20%;
 			height: 100%;
-			overflow: scroll;
+			overflow: hidden;
 		}
 		
 		#send_button {
@@ -167,7 +179,7 @@
 		
 		//create Gaming button
 		let x = document.createElement("BUTTON");
-		var t = document.createTextNode("Send IP");
+		var t = document.createTextNode("Game");
 		x.appendChild(t)
 		x.id = "game_button"
 		document.getElementById("input_box").appendChild(x)
@@ -230,7 +242,7 @@
 		let node = document.createElement("P");
 		if (variables["target"] == "all") {
 			node.innerHTML = variables["name"] + ": " + document.getElementById("message_input").value;
-			node.style.color = "blue";
+			node.style.color = "cyan";
 		} else {
 			node.innerHTML = "(private to " + variables["target"] + ") " + variables["name"] + ": " + document.getElementById("message_input").value;
 			node.style.color = "#795400";
@@ -265,7 +277,7 @@
 	 */
 	 function connectUser(name) {
 		let node = document.createElement("P");
-		node.style.color = "black";
+		node.style.color = "white";
 
 		// create join message depending on the client name
 		if (variables["name"] == name) {
@@ -286,7 +298,7 @@
 		// tell client a user has left
 		let disconnect_message = document.createElement("P");
 		disconnect_message.innerHTML = "[SERVER]: User " + name + " has left the chat...";
-		disconnect_message.style.color = "black";
+		disconnect_message.style.color = "white";
 		document.getElementById("messages").appendChild(disconnect_message);
 	}
 
@@ -309,10 +321,10 @@
 			user_node.className = variables["users"][i];
 			if (variables["name"] == variables["users"][i]) {
 				user_node.innerHTML = variables["users"][i] + " (me)";
-				user_node.style.color = "blue";
+				user_node.style.color = "cyan";
 			} else {
 				user_node.innerHTML = variables["users"][i];
-				user_node.style.color = "black";
+				user_node.style.color = "white";
 			}
 
 			//add user to user list box
@@ -452,10 +464,10 @@
 	function selectPorts(){
 	let ptNumber1 = Math.floor(Math.random() * 100) + 12000;
 	let ptNumber2 = Math.floor(Math.random() * 100) + 12000;
-	let port1 = ptNumber1.toString()
-	let port2 = ptNumber2.toString()
-	variables["listenPort"] = port1
-	variables["sendPort"]  = port2
+	let port1 = ptNumber1.toString();
+	let port2 = ptNumber2.toString();
+	variables["listenPort"] = port1;
+	variables["sendPort"]  = port2;
 	}
 	
 	
@@ -474,7 +486,7 @@
 								})
 			let node = document.createElement("P");
 			node.innerHTML = variables["ip"] + ',' + variables["listenPort"] + ' -> ' + variables["target"];
-			node.style.color = "blue";
+			node.style.color = "cyan";
 			document.getElementById("messages").appendChild(node);
 		}
 	}

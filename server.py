@@ -9,7 +9,7 @@ import group_manager as gm
 sio = socketio.Server(async_mode="eventlet")
 manager = gm.GroupManager()
 app = socketio.WSGIApp(sio, static_files={
-    '/': {'content_type': 'text/html', 'filename': 'client.html'}
+    '/': {'content_type': 'text/html', 'filename': 'index.html'}
 })
 ip2ID = {}
 

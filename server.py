@@ -16,6 +16,7 @@ ip2ID = {}
 #
 # connect - Registers when a client has connected
 #
+
 @sio.event
 def connect(sid, environ):
     print('connect ',environ["REMOTE_ADDR"],"on port",environ["REMOTE_PORT"])
@@ -125,7 +126,7 @@ def main(arg1, arg2):
     eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
     
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
+    @sio.run_app()
     
 #if __name__ == '__main__':
 #    port = int(os.environ.get('PORT', 8080))

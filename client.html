@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<<<<<<< HEAD
 	<head>
 		<title>AnChat - Login</title>
 	</head>
@@ -351,40 +350,6 @@
 		updateRecipientList();
 		updateRecipient();
 	});
-	
-	
-
-	/*
-	 * selectPorts - selects the ports on which the users sockets will communicate
-	 */
-	function selectPorts(){
-	let ptNumber1 = Math.floor(Math.random() * 100) + 12000;
-	let ptNumber2 = Math.floor(Math.random() * 100) + 12000;
-	let port1 = ptNumber1.toString()
-	let port2 = ptNumber2.toString()
-	variables["listenPort"] = port1
-	variables["sendPort"]  = port2
-	}
-
-
-	/*
-	 * send_addy - sends the user's remote address to the groupchat member specified in input2, starting the game on both machines
-	 */
-	function send_addy(){
-		selectPorts()
-		socket.emit("exchange_addresses",{
-							"user":		variables["username"],
-							"to":		document.getElementById("input2").value,
-							"ip": 		variables["ip"],
-							"sendPort" : variables["sendPort"],
-							"listenPort": 	variables["listenPort"]
-							})
-		let node = document.createElement("P");
-		node.innerHTML = variables["ip"] + ',' + variables["listenPort"] + ' -> ' + document.getElementById("input2").value;
-		node.style.color = "blue";
-		document.getElementById("messages").appendChild(node);
-		document.getElementById("input2").value = "";
-	}
 	</script>
 
 	<body>
@@ -422,88 +387,4 @@
 			
 		<script type="text/javascript"> window.onLoad = loginLayout(); </script>
 	</body>
-=======
-<head>
-    <title>AnChat - Login</title>
-</head>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.min.js"></script>
-<body>
-
-    <h1 class="h1_1" id="title">Welcome to the chat!</h1>
-    <p class= "p_1" id ="subtitle">Please choose a group to join or type the name of the group you want to create.</p>
-	<div id="messages"></div>
-    <input id="groupName" placeholder="group name"></input>
-	<input id="input2" placeholder="username"></input>
-    <input id="button1" type="submit" value="Join" onclick="join()"></input>
-	<input id="gameButton" type="button" value="Game" onclick="window.open('file:///D:/start_game.bat')"></input>
-
-</body>
-<script type="text/javascript">
-url = ('http://' + document.domain + ':' + location.port);
-socket = io.connect(url);
-variables = {};
-function join(){
-    let group = document.getElementById("groupName").value;
-	let username = document.getElementById("input2").value;
-	variables["group"] = group;
-	variables["username"] = username;
-    socket.emit( "join", {"group" : group, "username": username});
-}
-
-socket.on("addr",function(data){
-    variables["ip"] = data["ip"]
-    
-
-})
-
-socket.on("joinStatus", function(data){
-	if (data === "ok"){
-		chatLayout();
-	} else {
-		document.getElementById("title").innerHTML = "Something's wrong...";
-		document.getElementById("subtitle").innerHTML = "The username you have chosen if already taken, please select another.";
-		document.getElementById("input2").value = "";
-	}
-});
-
-function chatLayout(){
-	document.getElementById("title").innerHTML = "Welcome to " + variables["group"]+' '+variables["username"]+ '!';
-	document.getElementById("subtitle").innerHTML = "You may start chatting with the members of the group.";
-	document.getElementById("groupName").placeholder = "Send to " + variables["group"];
-	document.getElementById("groupName").value = "";
-	document.getElementById("input2").value = ""
-	document.getElementById("input2").placeholder = "user"
-	document.getElementById("button1").value = "Send Message";
-	document.getElementById("button1").onclick = send;
-	let x = document.createElement("BUTTON");
-	var t = document.createTextNode("Send IP");
-	x.appendChild(t)
-	x.id = "button2"
-	document.body.appendChild(x)
-	document.getElementById("button2").onclick = send_addy;
-}
-
-//send_msg - send messages from the user
-function send(){
-	socket.emit("recv",{
-						"group":	variables["group"],
-						"user":		variables["username"],
-						"message": 	document.getElementById("groupName").value
-						})
-	document.getElementById("groupName").value = "";
-	let node = document.createElement("P");
-	node.innerHTML = document.getElementById("groupName").value;
-	node.style.color = "blue";
-	document.getElementById("messages").appendChild(node);
-}
-
-//Recv_msg - gets messages coming in
-socket.on("recv", function(data){
-			let node = document.createElement("P");
-			node.innerHTML = data["user"]+':\t'+data["message"];
-			node.style.color = "red";
-			document.getElementById("messages").appendChild(node);
-		})
-</script>
->>>>>>> game
 </html>

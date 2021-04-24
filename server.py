@@ -123,7 +123,7 @@ def disconnect(sid):
 
     
 if __name__ == '__main__':
-    sio.run(app, host='0.0.0.0', port=65432)
+    eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
     
 #if __name__ == '__main__':
 #    port = int(os.environ.get('PORT', 8080))

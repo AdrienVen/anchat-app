@@ -120,7 +120,8 @@ def send(data):
 def disconnect(sid):
     print('disconnect ', sid)
 
-def main():
+def main(arg1, arg2):
+    print(arg1,arg2)
     eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
     
 if __name__ == '__main__':

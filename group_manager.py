@@ -1,3 +1,5 @@
+# group_manager.py - made by Adrien Ventugol and Alex Gonsalves
+
 class GroupManager:
 
     class Client:

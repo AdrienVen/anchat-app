@@ -123,7 +123,7 @@ def disconnect(sid):
 
     
 if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('https://anchat-app.herokuapp.com/', 8000)), app)
+    eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
     
 #if __name__ == '__main__':
 #    port = int(os.environ.get('PORT', 8080))

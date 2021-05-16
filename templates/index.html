@@ -147,7 +147,8 @@
 	<script type="text/javascript">
 
 	// Socket variables
-	url = ('http://' + document.domain + ':' + location.port);
+	var protocol = window.location.protocol;
+	url = (protocol + '//' + document.domain + ':' + location.port);
 	socket = io.connect(url);
 	variables = {
 		"group": "",

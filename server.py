@@ -13,6 +13,7 @@ app = socketio.WSGIApp(sio, static_files={
 })
 ip2ID = {}
 
+@app.route()
 @sio.event
 def connect(sid, environ):
     print('connect ',environ["REMOTE_ADDR"],"on port",environ["REMOTE_PORT"])
@@ -101,4 +102,4 @@ def disconnect(sid):
 
 def main(arg1, arg2):
     eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
-    return app.static_files["/"]
+    return app.static_files["/"]["filename"]
